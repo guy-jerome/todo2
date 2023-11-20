@@ -1,0 +1,1 @@
+CREATE TABLE todo (id serial PRIMARY KEY, name varchar(255));
