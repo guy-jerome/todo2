@@ -10,7 +10,7 @@ const port = process.env.PORT || 3000;
 const pool = new pg.Pool({
   user: 'postgres',
   host: 'localhost',
-  database: "todo",
+  database: 'todo',
   password: process.env.DB_PASS,
   port: 5432
 })
@@ -19,12 +19,12 @@ app.use(express.json())
 app.use(express.static("public"))
 
 //GET ALL
-app.get('/api/togo', async (req,res,next)=>{
+app.get('/api/todo', async (req,res,next)=>{
   const client = await pool.connect()
   try{
   const result = await client.query('SELECT * FROM todo;')
   const data = result.rows
-  req.status(200).json(data)
+  res.status(200).json(data)
   }catch (err){
   next(err)
   }finally{
@@ -32,13 +32,13 @@ app.get('/api/togo', async (req,res,next)=>{
   }
 })
 //GET ONE
-app.get('/api/togo/:id', async (req,res,next)=>{
+app.get('/api/todo/:id', async (req,res,next)=>{
   const id = req.params.id
   const client = await pool.connect()
   try{
   const result = await client.query('SELECT * FROM todo WHERE id = $1', [id])
   const data = result.rows
-  req.status(200).json(data)
+  res.status(200).json(data)
   }catch (err){
   next(err)
   }finally{
@@ -46,13 +46,13 @@ app.get('/api/togo/:id', async (req,res,next)=>{
   }
 })
 //CREATE ONE
-app.post('/api/togo', async (req,res,next)=>{
-  cont {name} = req.body
+app.post('/api/todo', async (req,res,next)=>{
+  const {name} = req.body
   const client = await pool.connect()
   try{
-  const result = await client.query('INSERT INTO todo (name) VALUES ($1)',[name])
+  const result = await client.query('INSERT INTO todo (name) VALUES ($1) RETURNING *;',[name])
   const data = result.rows
-  req.status(200).json(data)
+  res.status(200).json(data)
   }catch (err){
   next(err)
   }finally{
@@ -60,13 +60,13 @@ app.post('/api/togo', async (req,res,next)=>{
   }
 })
 //DELETE ONE
-app.get('/api/togo/:id', async (req,res,next)=>{
+app.delete('/api/todo/:id', async (req,res,next)=>{
   const id = req.params.id
   const client = await pool.connect()
   try{
-  const result = await client.query('DELETE FROM togo WHERE id = $1;', [id])
+  const result = await client.query('DELETE FROM todo WHERE id = $1 RETURNING *;', [id])
   const data = result.rows
-  req.status(200).json(data)
+  res.status(200).json(data)
   }catch (err){
   next(err)
   }finally{
@@ -74,14 +74,14 @@ app.get('/api/togo/:id', async (req,res,next)=>{
   }
 })
 //UPDATE ONE
-app.get('/api/togo/:id', async (req,res,next)=>{
+app.put('/api/todo/:id', async (req,res,next)=>{
   const id = req.params.id
   const {name} = req.body
   const client = await pool.connect()
   try{
-  const result = await client.query('UPDATE togo SET name=$1 WHERE id=$2',[name,id])
+  const result = await client.query('UPDATE todo SET name=$1 WHERE id=$2 RETURNING *',[name,id])
   const data = result.rows
-  req.status(200).json(data)
+  res.status(200).json(data)
   }catch (err){
   next(err)
   }finally{
